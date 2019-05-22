@@ -29,43 +29,39 @@ def scrape():
     time.sleep(20)
     html = browser.html
     browser.click_link_by_partial_text('FULL IMAGE')
-	time.sleep(7)
-	browser.click_link_by_partial_text('more info')
+    time.sleep(10)
+    browser.click_link_by_partial_text('more info')
+    image_html = browser.html
+    new_soup = bs(image_html, 'html.parser')
+    container = new_soup.find('img', class_='main_image')
+    src_url = container.get('src')
 
-	image_html = browser.html
-	new_soup = bs(image_html, 'html.parser')
-	container = new_soup.find('img', class_='main_image')
-	src_url = container.get('src')
-
-	featured_image_url  = "https://www.jpl.nasa.gov/" + src_url
-
+    featured_image_url  = "https://www.jpl.nasa.gov/" + src_url
     mars_facts_data["featured_image"] = featured_image_url
-    
-    #Mars Weather
 
+#Mars Weather
     twitter_url ="https://twitter.com/marswxreport?lang=en"
     response = requests.get(twitter_url)
-	weather_soup = bs(response.text, 'html.parser'))
+    weather_soup = bs(response.text, 'html.parser')
     tweet_container = weather_soup.find('div', class_="js-tweet-text-container")
     mars_weather = tweet_container.text
     mars_facts_data["mars_weather"] = mars_weather
 
-    # #### Mars Facts
-
+# #### Mars Facts
     facts_url = "https://space-facts.com/mars/"
     time.sleep(2)
     facts_response = requests.get(facts_url)
     mars_facts_tb = pd.read_html(facts_response.text)
     df_mars_facts = mars_facts_tb[0]
 
-    
+
     df_mars_facts.columns = ["Parameter", "Values"]
     clean_table = df_mars_facts.set_index(["Parameter"])
     mars_html_table = clean_table.to_html()
     mars_html_table = mars_html_table.replace("\n", ", ")
     mars_facts_data["mars_facts_table"] = mars_html_table
 
-    # #### Mars Hemisperes
+# #### Mars Hemisperes
 
     hemi_url = "https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars"
     browser.visit(url_hemisphere)
@@ -74,20 +70,19 @@ def scrape():
     hemi_container = soup.find_all('div', class_="item")
     hemisphere_image_urls = []
 
-	for i in hemi_container:
-	    title = i.find('h3').text                                        #Get title
-	    url_container = i.find('a')
-	    url = url_container['href']
-	    img_url = "https://astrogeology.usgs.gov/" + url           #get image link
-	    img_request = requests.get(img_url)                        #start new request to get full image
-	    soup = bs(img_request.text, 'html.parser')
-	    img_tag = soup.find('div', class_='downloads')
-	    img_url2 = img_tag.find('a')['href']
-	    hemisphere_image_urls.append({"Title": title, "Image_Url": img_url2})
+    for i in hemi_container:
+    	title = i.find('h3').text                                        #Get title
+    	url_container = i.find('a')
+    	url = url_container['href']
+    	img_url = "https://astrogeology.usgs.gov/" + url           #get image link
+    	img_request = requests.get(img_url)                        #start new request to get full image
+    	soup = bs(img_request.text, 'html.parser')
+    	img_tag = soup.find('div', class_='downloads')
+    	img_url2 = img_tag.find('a')['href']
+    	hemisphere_image_urls.append({"Title": title, "Image_Url": img_url2})
 
 
     mars_facts_data["hemisphere_img_url"] = hemisphere_img_urls
 
     
-
     return mars_facts_data
