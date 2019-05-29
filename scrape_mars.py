@@ -12,7 +12,7 @@ def scrape():
     mars_facts_data = {}
 
     news_url = "https://mars.nasa.gov/news/?page=0&per_page=40&order=publish_date+desc%2Ccreated_at+desc&search=&category=19%2C165%2C184%2C204&blank_scope=Latest"
-    response = requests.get(url)
+    response = requests.get(news_url)
     
 
     soup = bs(response.text, "html.parser")
@@ -26,7 +26,7 @@ def scrape():
     #Mars Featured Image
     JPL_url = "https://www.jpl.nasa.gov/spaceimages/?search=&category=Mars"
     browser.visit(JPL_url)
-    time.sleep(20)
+    time.sleep(15)
     html = browser.html
     browser.click_link_by_partial_text('FULL IMAGE')
     time.sleep(10)
@@ -61,6 +61,10 @@ def scrape():
     mars_html_table = mars_html_table.replace("\n", ", ")
     mars_facts_data["mars_facts_table"] = mars_html_table
 
+    #save table to HTML
+    df_mars_facts.to_html('mars_table.html', index=False)
+
+
 # #### Mars Hemisperes
 
     hemi_url = "https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars"
@@ -84,5 +88,7 @@ def scrape():
 
     mars_facts_data["hemisphere_img_url"] = hemisphere_img_urls
 
-
+    #browser.quit()
+    print(mars_facts_data)
     return mars_facts_data
+
