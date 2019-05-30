@@ -31,7 +31,7 @@ def home():
 
 @app.route('/scrape')
 def scraper():
-   #db.collection.remove()
+    db.collection.remove()
     scraped = scrape_mars.scrape()
     db.mars_facts.insert_one(scraped)
     
